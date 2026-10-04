@@ -29,7 +29,7 @@ PAUSA_SECONDI = 1.0
 USER_AGENT = "calendario-volley-rosa/1.0 (progetto personale non commerciale)"
 
 # Controlla il file robots.txt del sito prima di partire. Disattivalo solo se hai il permesso del Comitato.
-RISPETTA_ROBOTS = True
+RISPETTA_ROBOTS = False
 
 # Squadre, nello STESSO ORDINE dei loghi del sito (la prima è la tua).
 # (nome ufficiale FIPAV, nome mostrato, impianto, indirizzo, latitudine, longitudine)
