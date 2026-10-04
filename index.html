@@ -226,7 +226,6 @@ else h+=`<div class="card empty" style="margin-top:1rem">Nessuna partita in prog
 if(last)h+=`<h2>Ultimo risultato</h2>${mrow(last,0,1)}`;
 const gg=nx?nx.g:last?last.g:0,ot=M.filter(m=>m.g==gg&&!mine(m));
 if(ot.length)h+=`<h2>Altre partite della giornata ${gg}</h2>`+ot.map(m=>mrow(m)).join('');
-h+=`<h2>Anteprima (solo test)</h2><div class="chips">${[['0','Dati reali'],['1','Dati di esempio']].map(([k,l])=>`<button class="${(+DEMO)==k?'on':''}" data-d="${k}">${l}</button>`).join('')}</div><div class="chips">${[['','Automatico'],['cd','Countdown'],['live','In corso'],['wait','In attesa risultati']].map(([k,l])=>`<button class="${(PREV||'')==k?'on':''}" data-p="${k}">${l}</button>`).join('')}</div>`;
 $('#v0').innerHTML=h;tick()}
 let sig='';function tick(){const z=M.map(st).join('');if(z!=sig){sig=z;home();cal();return}const nx=M.find(m=>!m.s&&mine(m));if(!nx)return;if(PH(nx)!=curPh)return home();const c=$('#cd');if(!c)return;const s=Math.max(0,Math.floor((nx.d-Date.now())/1000)),v=[Math.floor(s/86400),Math.floor(s%86400/3600),Math.floor(s%3600/60),s%60];c.querySelectorAll('b').forEach((b,i)=>b.textContent=String(v[i]).padStart(i?2:1,'0'))}
 setInterval(tick,1000);
