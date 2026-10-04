@@ -1,0 +1,30 @@
+name: Aggiorna dati campionato
+
+on:
+  schedule:
+    - cron: "*/5 14-22 * * 5,6,0"   # venerdì-domenica, orario di gara: ogni 5 minuti (orari in UTC)
+    - cron: "0 * * * *"              # tutto il resto del tempo: una volta all'ora
+  workflow_dispatch:                 # permette di lanciarlo a mano dal tasto "Run workflow"
+
+permissions:
+  contents: write
+
+concurrency: aggiorna-dati
+
+jobs:
+  scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python scraper.py
+      - name: Salva dati.json se è cambiato
+        run: |
+          git config user.name "aggiornamento-automatico"
+          git config user.email "actions@users.noreply.github.com"
+          git add dati.json
+          git diff --cached --quiet || (git commit -m "Aggiorna dati" && git push)
