@@ -6,6 +6,7 @@ e una richiesta in più solo per ogni partita appena giocata (per leggere i parz
 Se qualcosa va storto il file dati.json NON viene toccato: online resta l'ultima versione buona.
 """
 import json
+import math
 import re
 import sys
 import time
@@ -25,11 +26,13 @@ URL_ELENCO = ("https://www.fipavvicenza.it/risultati-classifiche?ComitatoId=8&St
               "&DataDa=&StatoGara=&CId=93505&SId=&btFiltro=CERCA")
 URL_DETTAGLIO = "https://www.fipavvicenza.it/mobile/risultati.asp?CampionatoId={cid}&GaraId={gid}"
 OUTPUT = Path("dati.json")
+CACHE_COORDINATE = Path("coordinate.json")   # coordinate trovate una volta sola e poi riusate
+URL_GEO = "https://nominatim.openstreetmap.org/search"   # geocodifica gratuita di OpenStreetMap
 PAUSA_SECONDI = 1.0
 USER_AGENT = "calendario-volley-rosa/1.0 (progetto personale non commerciale)"
 
 # Controlla il file robots.txt del sito prima di partire. Disattivalo solo se hai il permesso del Comitato.
-RISPETTA_ROBOTS = False
+RISPETTA_ROBOTS = True
 
 # Squadre, nello STESSO ORDINE dei loghi del sito (la prima è la tua).
 # (nome ufficiale FIPAV, nome mostrato, impianto, indirizzo, latitudine, longitudine)
@@ -48,6 +51,7 @@ SQUADRE = [
 ]
 # ------------------------------------------------------------------------------
 
+FILE_COORDINATE = Path("coordinate.json")  # lo crea geocodifica.py: coordinate esatte dei palazzetti
 INDICE = {s[0]: i for i, s in enumerate(SQUADRE)}
 
 SESSIONE = requests.Session()
@@ -81,6 +85,46 @@ def verifica_robots() -> None:
         if not regole.can_fetch(USER_AGENT, url):
             raise SystemExit("robots.txt del sito non consente l'accesso automatico a:\n  " + url +
                              "\nChiedi l'ok al Comitato prima di continuare (vedi RISPETTA_ROBOTS in cima al file).")
+
+
+def distanza_km(a, b) -> float:
+    la1, lo1, la2, lo2 = map(math.radians, (*a, *b))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 12742 * math.asin(math.sqrt(h))
+
+
+def geocodifica(indirizzo: str, approssimata):
+    """Cerca l'indirizzo su OpenStreetMap (Nominatim). Restituisce (lat, lon), oppure None se la rete non risponde."""
+    senza_civico = re.sub(r",\s*\d+\w*(?=,)", "", indirizzo)
+    for domanda in dict.fromkeys([indirizzo, senza_civico]):
+        time.sleep(1.1)  # regola di Nominatim: al massimo 1 richiesta al secondo
+        try:
+            risposta = SESSIONE.get(URL_GEO, params={"q": domanda, "format": "jsonv2", "limit": 1,
+                                                     "countrycodes": "it"}, timeout=30)
+            risposta.raise_for_status()
+            trovati = risposta.json()
+        except (requests.RequestException, ValueError):
+            return None
+        if trovati:
+            punto = (round(float(trovati[0]["lat"]), 5), round(float(trovati[0]["lon"]), 5))
+            if distanza_km(punto, approssimata) <= 20:  # scarta risultati lontani (indirizzo omonimo altrove)
+                return punto
+    return approssimata  # non trovato: resta la posizione indicativa (correggila a mano in coordinate.json)
+
+
+def coordinate_squadre():
+    """Coordinate dei palazzetti: dalla cache, oppure cercate su OpenStreetMap la prima volta."""
+    cache = json.loads(CACHE_COORDINATE.read_text(encoding="utf-8")) if CACHE_COORDINATE.exists() else {}
+    nuove = False
+    for s in SQUADRE:
+        if s[3] not in cache and s[0] not in cache:  # la cache può essere indicizzata per indirizzo o per nome ufficiale
+            punto = geocodifica(s[3], (s[4], s[5]))
+            if punto:
+                cache[s[3]] = list(punto)
+                nuove = True
+    if nuove:
+        CACHE_COORDINATE.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    return [tuple(cache.get(s[3]) or cache.get(s[0]) or (s[4], s[5])) for s in SQUADRE]
 
 
 def numero(testo: str) -> float:
@@ -146,8 +190,9 @@ def parse_dettaglio(html: str):
     return [casa[0], ospite[0]], [[a, b] for a, b in zip(casa[1], ospite[1])]
 
 
-def costruisci_dati(partite, classifica, precedenti, leggi_dettaglio):
+def costruisci_dati(partite, classifica, precedenti, leggi_dettaglio, coord=None):
     """Mette insieme il dizionario finale. leggi_dettaglio(id) -> html (usata solo per le gare nuove)."""
+    coord = json.loads(FILE_COORDINATE.read_text(encoding="utf-8")) if FILE_COORDINATE.exists() else {}
     for p in partite:
         if not p["r"]:
             continue
@@ -166,7 +211,8 @@ def costruisci_dati(partite, classifica, precedenti, leggi_dettaglio):
     partite.sort(key=lambda p: (p["g"], p["d"]))
     return {
         "campionato": "Seconda divisione maschile - girone unico",
-        "squadre": [{"nome": s[1], "impianto": s[2], "indirizzo": s[3], "la": s[4], "lo": s[5]} for s in SQUADRE],
+        "squadre": [{"nome": s[1], "impianto": s[2], "indirizzo": s[3],
+                     "la": coord.get(s[0], [s[4], s[5]])[0], "lo": coord.get(s[0], [s[4], s[5]])[1]} for s in SQUADRE],
         "partite": partite,
         "classifica": classifica,
     }
@@ -182,7 +228,8 @@ def main() -> None:
             precedenti = {p["id"]: p for p in json.loads(OUTPUT.read_text(encoding="utf-8")).get("partite", [])}
         dati = costruisci_dati(
             partite, classifica, precedenti,
-            lambda gid: scarica(URL_DETTAGLIO.format(cid=CAMPIONATO_ID, gid=gid)))
+            lambda gid: scarica(URL_DETTAGLIO.format(cid=CAMPIONATO_ID, gid=gid)),
+            coordinate_squadre())
     except (requests.RequestException, ValueError) as errore:
         raise SystemExit(f"Errore: {errore}\nIl file {OUTPUT} NON è stato aggiornato.")
 

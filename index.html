@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="it" data-theme="light"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <title>Comunello Volley Rosà</title>
 <style>
 :root{--bg:#fdf5d8;--card:#fffdf4;--ink:#1f1b0e;--muted:#7a7155;--acc:#f2c230;--line:rgba(60,45,5,.1);--glass:rgba(255,250,225,.5);--gl:rgba(255,255,255,.8);--sh:0 8px 24px rgba(120,90,10,.14);--glow:rgba(247,200,50,.45);--dk:#211c0e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -171,6 +173,8 @@ h2{letter-spacing:.08em;font-weight:700}.mh,.leg{letter-spacing:.01em}
 @media (prefers-reduced-motion:reduce){.view,.sh,.shc,#v4.on,.view.pop{animation:none}nav .pill{transition:none}.hd::before{transition:none}}
 img.logo{background:#fff;border-radius:28%;object-fit:contain;padding:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.07),0 2px 6px rgba(0,0,0,.12)}
 #mp{height:340px}
+.map{z-index:0}.map .hint{z-index:1000}.map.leaflet-container{font:inherit}.leaflet-popup-content{font-size:.85rem;line-height:1.4;color:#1f1b0e}
+[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
 </style></head><body>
 <main>
 <header class="hd"><div><h1>Comunello Volley Rosà</h1><div class="sub"><span>Campionato FIPAV Vicenza</span><span class="chip" id="upd"></span></div></div><button class="th" id="th" aria-label="Cambia tema">◐</button></header>
@@ -250,7 +254,16 @@ let h=`<button class="back" id="bk">‹ Indietro</button><div class="tn big">${l
 h+=`<h2>Palestra</h2><div class="card"><div class="map" id="map"></div><div class="row" style="margin-top:.8rem"><div><b>${g.n}</b><br><span style="color:var(--muted);font-size:.88rem">${g.a}</span></div><a class="btn" href="${dir(g)}" target="_blank" rel="noopener">Indicazioni</a></div></div>`;
 h+=`<h2>Classifica</h2>${tbl(i)}<h2>Calendario</h2>`+mm.map(m=>`<div class="gh" style="margin:.7rem .3rem .4rem"><b>Giornata ${m.g}</b></div>${mrow(m,i)}`).join('');
 $('#v4').innerHTML=h;$('#bk').onclick=()=>go(back);show(4);drawMap($('#map'),i)}
-function drawMap(el,i){const la=G.map(g=>g.la),lo=G.map(g=>g.lo),a1=Math.max(...la),a0=Math.min(...la),o0=Math.min(...lo),o1=Math.max(...lo),H=i<0?340:230,kx=Math.cos(45.65*Math.PI/180),dx=(o1-o0)*kx,dy=a1-a0,sk=Math.min(320/dx,(H-90)/dy),P=g=>[200+((g.lo-o0)*kx-dx/2)*sk,H/2+((a1-g.la)-dy/2)*sk],nm=g=>g.n.split(' · ')[1];
+// ---- Mappa vera: Leaflet + OpenStreetMap (gratis, senza chiavi). Si attiva quando la pagina è sul tuo hosting ----
+const PIN='<svg viewBox="-16 -38 32 40" width="30" height="40" style="overflow:visible"><path d="M0 0C-16-18-16-38 0-38S16-18 0 0z" fill="#f2c230" stroke="#211c0e" stroke-width="2.5"/><circle cy="-25" r="5" fill="#211c0e"/></svg>',DOT='<div style="width:16px;height:16px;border-radius:50%;background:#a39a74;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>';
+function realMap(el,i){el.innerHTML='';el.classList.add('lock');
+const m=L.map(el,{dragging:false,touchZoom:false,doubleClickZoom:false,scrollWheelZoom:false,boxZoom:false,keyboard:false,tap:false}).setView([G[Math.max(i,0)].la,G[Math.max(i,0)].lo],12);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(m);
+G.forEach((g,k)=>{const sel=k==i||i<0;L.marker([g.la,g.lo],{icon:L.divIcon({className:'',html:sel?PIN:DOT,iconSize:sel?[30,40]:[16,16],iconAnchor:sel?[15,38]:[8,8]}),zIndexOffset:sel?500:0}).addTo(m).bindPopup(`<b>${T[k]}</b><br>${g.n}<br><a href="${dir(g)}" target="_blank" rel="noopener">Indicazioni</a> · <a data-t="${k}" style="cursor:pointer;font-weight:600">Scheda squadra</a>`)});
+const fit=()=>i<0?m.fitBounds(L.latLngBounds(G.map(g=>[g.la,g.lo])),{padding:[30,30]}):m.setView([G[i].la,G[i].lo],15);fit();
+el.insertAdjacentHTML('beforeend','<div class="hint">Tocca per muovere la mappa</div>');
+m.on('click',()=>{if(!el.classList.contains('lock'))return;el.classList.remove('lock');['dragging','touchZoom','doubleClickZoom','scrollWheelZoom'].forEach(k=>m[k].enable())});el._m=m;el._fit=fit}
+function drawMap(el,i){if(window.L&&!window.claude)return realMap(el,i);const la=G.map(g=>g.la),lo=G.map(g=>g.lo),a1=Math.max(...la),a0=Math.min(...la),o0=Math.min(...lo),o1=Math.max(...lo),H=i<0?340:230,kx=Math.cos(45.65*Math.PI/180),dx=(o1-o0)*kx,dy=a1-a0,sk=Math.min(320/dx,(H-90)/dy),P=g=>[200+((g.lo-o0)*kx-dx/2)*sk,H/2+((a1-g.la)-dy/2)*sk],nm=g=>g.n.split(' · ')[1];
 const pn=(g,k,sc)=>{const[x,y]=P(g);return `<g data-t="${k}" transform="translate(${x} ${y}) scale(${sc})" style="cursor:pointer"><path d="M0 0C-16-18-16-38 0-38S16-18 0 0z" fill="#f2c230" stroke="#211c0e" stroke-width="2.5"/><circle cy="-25" r="5" fill="#211c0e"/><text y="${17/sc}" font-size="${(i<0?8:11)/sc}" font-weight="700" text-anchor="middle" fill="currentColor">${nm(g)}</text></g>`};
 const dot=(g,k)=>{const[x,y]=P(g);return `<g data-t="${k}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="9" fill="#a39a74" opacity=".9"/><text x="${x}" y="${y+22}" font-size="10" text-anchor="middle" fill="currentColor">${nm(g)}</text></g>`};
 const body=G.map((g,k)=>i<0?pn(g,k,.8):k==i?'':dot(g,k)).join('')+(i>=0?pn(G[i],i,1):'');
@@ -264,7 +277,7 @@ sv.onpointerdown=e=>{dn={x:e.clientX,y:e.clientY,m:0}};
 sv.onpointermove=e=>{if(!dn||el.classList.contains('lock'))return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;if(!dn.m&&Math.hypot(dx,dy)<5)return;if(!dn.m){dn.m=1;sv.setPointerCapture(e.pointerId)}const k=v[2]/sv.clientWidth;v[0]-=dx*k;v[1]-=dy*k;dn.x=e.clientX;dn.y=e.clientY;set()};
 sv.onpointerup=sv.onpointercancel=()=>dn=null}
 // ---- inizializzazione e navigazione ----
-let cur=0,back=0;const bs=[...document.querySelectorAll('#nav button')],show=i=>{document.querySelectorAll('.view').forEach((v,j)=>v.classList.toggle('on',i==j));scrollTo({top:0})};
+let cur=0,back=0;const bs=[...document.querySelectorAll('#nav button')],show=i=>{document.querySelectorAll('.view').forEach((v,j)=>v.classList.toggle('on',i==j));scrollTo({top:0});setTimeout(()=>document.querySelectorAll('.map').forEach(e=>{if(e._m){e._m.invalidateSize();e._fit&&e._fit()}}),80)};
 let ni=0;function go(i){const fr=cur==4;cur=i;ni=i;bs.forEach((x,j)=>x.classList.toggle('on',i==j));$('#nav').style.setProperty('--i',i);show(i);if(fr){const v=document.querySelectorAll('.view')[i];v.classList.add('pop');setTimeout(()=>v.classList.remove('pop'),520)}navigator.vibrate&&navigator.vibrate(6)}
 bs.forEach((b,i)=>b.onclick=()=>go(i));
 document.addEventListener('click',e=>{if(e.target.closest('[data-cal]'))return openCal();if(e.target.closest('[data-ics]'))return ics();if(e.target.closest('[data-x]')||e.target.id=='sh'){SH.hidden=true;return}const t=e.target.closest('[data-t]');if(t){const i=+t.dataset.t;if(cur<4)back=cur;cur=4;team(i);return}const dd=e.target.closest('[data-d]');if(dd){DEMO=dd.dataset.d=='1';load(RAW);render();return}const p=e.target.closest('[data-p]');if(p){PREV=p.dataset.p||null;home();cal()}});
