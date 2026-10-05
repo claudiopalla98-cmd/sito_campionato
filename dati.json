@@ -12,15 +12,15 @@
    "nome": "Cesuna 2DM",
    "impianto": "Palasport Auditorium di Galliosito · Gallio",
    "indirizzo": "Via Roma, 31, 36032 Gallio VI",
-   "la": 45.889,
-   "lo": 11.535
+   "la": 45.89217,
+   "lo": 11.5505
   },
   {
    "nome": "Aurora 76 Trytech",
    "impianto": "S.M. Virgilio · Camisano Vicentino",
    "indirizzo": "Via Europa, 45, 36043 Camisano Vicentino VI",
-   "la": 45.525,
-   "lo": 11.788
+   "la": 45.52228,
+   "lo": 11.71671
   },
   {
    "nome": "S.T.A.I. Volley Campiglia",
@@ -33,29 +33,29 @@
    "nome": "Meledo 2DIVM",
    "impianto": "S.M. \"Muttoni\" · Sarego",
    "indirizzo": "Via Damiano Chiesa, 36040 Meledo VI",
-   "la": 45.485,
-   "lo": 11.376
+   "la": 45.43498,
+   "lo": 11.41188
   },
   {
    "nome": "Robur 2DM Rossa",
    "impianto": "Centro Sportivo Tommaso Assi · Thiene",
    "indirizzo": "Via San Gaetano, 33H, 36016 Thiene VI",
-   "la": 45.7107,
-   "lo": 11.4778
+   "la": 45.70755,
+   "lo": 11.48364
   },
   {
    "nome": "USD Altair",
    "impianto": "S.E. Tiepolo · Vicenza",
    "indirizzo": "Via Palemone Remnio, 14, 36100 Vicenza VI",
-   "la": 45.553,
-   "lo": 11.543
+   "la": 45.54684,
+   "lo": 11.57279
   },
   {
    "nome": "Marmi Faedo II Div.M",
    "impianto": "S.M. Crosara · Cornedo Vicentino",
    "indirizzo": "Via G. G. Trissino, 1, 36073 Cornedo Vicentino VI",
-   "la": 45.609,
-   "lo": 11.396
+   "la": 45.61628,
+   "lo": 11.34477
   },
   {
    "nome": "XForm VBV",
@@ -68,8 +68,8 @@
    "nome": "Robur 2DM Gialla",
    "impianto": "Comunale M. Ausiliatrice · Thiene",
    "indirizzo": "Via San Gaetano, 87, 36016 Thiene VI",
-   "la": 45.7085,
-   "lo": 11.4755
+   "la": 45.7073,
+   "lo": 11.48418
   }
  ],
  "partite": [
@@ -1026,5 +1026,5 @@
    "pen": 0
   }
  ],
- "aggiornato": "2026-10-04T12:00:00+02:00"
+ "aggiornato": "2026-10-05T23:55:00+02:00"
 }
