@@ -1,8 +1,8 @@
 """
 Scraper FIPAV Vicenza -> dati.json per il sito del campionato.
 
-Ogni giro fa UNA richiesta alla pagina "Risultati e classifiche" (tutte le partite + classifica)
-e una richiesta in più solo per ogni partita appena giocata (per leggere i parziali dei set).
+Ogni giro fa UNA sola richiesta, alla pagina "Risultati e classifiche" (tutte le partite, i risultati e la classifica).
+Le pagine /mobile/ non vengono usate: il robots.txt del sito non le consente ai programmi automatici.
 Se qualcosa va storto il file dati.json NON viene toccato: online resta l'ultima versione buona.
 """
 import json
@@ -21,14 +21,11 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # ---------- CONFIGURAZIONE ----------------------------------------------------
-CAMPIONATO_ID = "93505"
 URL_ELENCO = ("https://www.fipavvicenza.it/risultati-classifiche?ComitatoId=8&StId=2388"
               "&DataDa=&StatoGara=&CId=93505&SId=&btFiltro=CERCA")
-URL_DETTAGLIO = "https://www.fipavvicenza.it/mobile/risultati.asp?CampionatoId={cid}&GaraId={gid}"
 OUTPUT = Path("dati.json")
 CACHE_COORDINATE = Path("coordinate.json")   # coordinate trovate una volta sola e poi riusate
 URL_GEO = "https://nominatim.openstreetmap.org/search"   # geocodifica gratuita di OpenStreetMap
-PAUSA_SECONDI = 1.0
 USER_AGENT = "calendario-volley-rosa/1.0 (progetto personale non commerciale)"
 
 # Controlla il file robots.txt del sito prima di partire. Disattivalo solo se hai il permesso del Comitato.
@@ -81,7 +78,7 @@ def verifica_robots() -> None:
     risposta.raise_for_status()
     regole = RobotFileParser()
     regole.parse(risposta.text.splitlines())
-    for url in (URL_ELENCO, URL_DETTAGLIO.format(cid=CAMPIONATO_ID, gid="1")):
+    for url in (URL_ELENCO,):
         if not regole.can_fetch(USER_AGENT, url):
             raise SystemExit("robots.txt del sito non consente l'accesso automatico a:\n  " + url +
                              "\nChiedi l'ok al Comitato prima di continuare (vedi RISPETTA_ROBOTS in cima al file).")
@@ -154,8 +151,17 @@ def parse_elenco(html: str):
         except ValueError:
             print(f"[-] Gara {gara}: data non ancora definita, la salto")
             continue
-        partite.append({"id": trovato.group(1), "n": int(gara), "g": int(giornata), "d": data,
-                        "h": INDICE[casa], "a": INDICE[ospite], "r": "" if risultato == "-" else risultato})
+        partita = {"id": trovato.group(1), "n": int(gara), "g": int(giornata), "d": data,
+                   "h": INDICE[casa], "a": INDICE[ospite], "r": "" if risultato == "-" else risultato}
+        sets = re.search(r"(\d+)\s*[-–:]\s*(\d+)", partita["r"])
+        if sets:  # partita giocata: set vinti e, se presenti, parziali di ogni set
+            partita["s"] = [int(sets.group(1)), int(sets.group(2))]
+            cella = riga.select_one("td.risultato-dettagli")
+            parziali = [[int(x), int(y)] for x, y in re.findall(r"(\d{1,2})\s*[-–:]\s*(\d{1,2})",
+                                                              pulisci(cella.get_text(" ")))] if cella else []
+            if len(parziali) == sum(partita["s"]):
+                partita["p"] = parziali
+        partite.append(partita)
 
     classifica = []
     for riga in tab_class.select("tr"):
@@ -172,47 +178,13 @@ def parse_elenco(html: str):
     return partite, classifica
 
 
-def parse_dettaglio(html: str):
-    """Pagina mobile di una gara giocata: restituisce ([set casa, set ospite], [[parz. casa, parz. ospite], ...]) o None."""
-    soup = BeautifulSoup(html, "html.parser")
-
-    def lato(selettore):
-        box = soup.select_one(selettore)
-        set_vinti = box.select_one(".set") if box else None
-        if not set_vinti or not set_vinti.get_text().strip().isdigit():
-            return None
-        parziali = [int(x.get_text()) for x in box.select(".parziale") if x.get_text().strip().isdigit()]
-        return int(set_vinti.get_text()), parziali
-
-    casa, ospite = lato("#risultatoCasa"), lato("#risultatoOspite")
-    if not casa or not ospite:
-        return None
-    return [casa[0], ospite[0]], [[a, b] for a, b in zip(casa[1], ospite[1])]
-
-
-def costruisci_dati(partite, classifica, precedenti, leggi_dettaglio, coord=None):
-    """Mette insieme il dizionario finale. leggi_dettaglio(id) -> html (usata solo per le gare nuove)."""
-    coord = json.loads(FILE_COORDINATE.read_text(encoding="utf-8")) if FILE_COORDINATE.exists() else {}
-    for p in partite:
-        if not p["r"]:
-            continue
-        prima = precedenti.get(p["id"])
-        if prima and prima.get("r") == p["r"] and prima.get("p"):
-            p["s"], p["p"] = prima["s"], prima["p"]  # già letta: nessuna nuova richiesta
-            continue
-        time.sleep(PAUSA_SECONDI)
-        dettaglio = parse_dettaglio(leggi_dettaglio(p["id"]))
-        if dettaglio:
-            p["s"], p["p"] = dettaglio
-        else:  # ripiego: almeno i set dalla pagina elenco (es. "3 - 1")
-            trovato = re.search(r"(\d+)\s*-\s*(\d+)", p["r"])
-            if trovato:
-                p["s"] = [int(trovato.group(1)), int(trovato.group(2))]
+def costruisci_dati(partite, classifica, coord=None):
     partite.sort(key=lambda p: (p["g"], p["d"]))
+    punti = coord or [(x[4], x[5]) for x in SQUADRE]
     return {
         "campionato": "Seconda divisione maschile - girone unico",
-        "squadre": [{"nome": s[1], "impianto": s[2], "indirizzo": s[3],
-                     "la": coord.get(s[0], [s[4], s[5]])[0], "lo": coord.get(s[0], [s[4], s[5]])[1]} for s in SQUADRE],
+        "squadre": [{"nome": s[1], "impianto": s[2], "indirizzo": s[3], "la": punti[i][0], "lo": punti[i][1]}
+                    for i, s in enumerate(SQUADRE)],
         "partite": partite,
         "classifica": classifica,
     }
@@ -223,13 +195,7 @@ def main() -> None:
         verifica_robots()
     try:
         partite, classifica = parse_elenco(scarica(URL_ELENCO))
-        precedenti = {}
-        if OUTPUT.exists():
-            precedenti = {p["id"]: p for p in json.loads(OUTPUT.read_text(encoding="utf-8")).get("partite", [])}
-        dati = costruisci_dati(
-            partite, classifica, precedenti,
-            lambda gid: scarica(URL_DETTAGLIO.format(cid=CAMPIONATO_ID, gid=gid)),
-            coordinate_squadre())
+        dati = costruisci_dati(partite, classifica, coordinate_squadre())
     except (requests.RequestException, ValueError) as errore:
         raise SystemExit(f"Errore: {errore}\nIl file {OUTPUT} NON è stato aggiornato.")
 
