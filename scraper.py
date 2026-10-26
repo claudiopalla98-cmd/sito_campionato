@@ -125,7 +125,11 @@ def coordinate_squadre():
 
 
 def numero(testo: str) -> float:
-    return float(testo.replace(".", "").replace(",", "."))
+    """Quoziente come numero. '---' (non calcolabile: nessun set/punto perso) o cella vuota = 0."""
+    try:
+        return float(testo.replace(".", "").replace(",", "."))
+    except ValueError:
+        return 0.0
 
 
 def parse_elenco(html: str):
