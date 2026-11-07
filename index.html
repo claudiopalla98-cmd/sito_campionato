@@ -607,16 +607,16 @@ const ini=i=>{const w=T[i].split(' ');return(w[0][0]+w[w.length-1][0]).toUpperCa
 const logo=(i,z=34)=>LOGO[i]?`<img class="logo" style="width:${z}px;height:${z}px;padding:${Math.round(z*.1)}px" src="${LOGO[i]}" alt="">`:`<span class="logo" style="width:${z}px;height:${z}px;font-size:${Math.round(z*.3)}px">${ini(i)}</span>`;
 const OK='<svg viewBox="0 0 24 24"><path d="M6.5 12.5l3.8 3.8 7.2-8"/></svg>',KO='<svg viewBox="0 0 24 24"><path d="M7.5 7.5l9 9M16.5 7.5l-9 9"/></svg>';
 const form=i=>{const f=M.filter(m=>m.s&&(m.h==i||m.a==i)).sort((a,b)=>a.d-b.d).slice(-5);return f.length?f.map(m=>{const x=m.h==i?m.s:[m.s[1],m.s[0]],w=x[0]>x[1];return `<i class="${w?'v':'p'}" title="${w?'Vittoria':'Sconfitta'} ${x[0]}-${x[1]}">${w?OK:KO}</i>`}).join(''):'<span class="meta">nessuna partita giocata</span>'};
-const mrow=(m,hl=-1,sd=true)=>{const p=st(m),tr=(t,d)=>{const w=m.s&&m.s[d]>m.s[1-d];return `<div class="tr${w?' wn':''}" data-tm="${t}">${logo(t,26)}<span class="nm">${T[t]}</span>${m.p?`<span class="ps">${m.p.map(x=>`<i class="${x[d]>x[1-d]?'w':''}">${x[d]}</i>`).join('')}</span>`:''}<b class="tot">${m.s?m.s[d]:''}</b></div>`};return `<div class="mx ${m.h==hl||m.a==hl?'me':''}" data-m="${m.id}" role="button" tabindex="0">${(sd||p)?`<div class="mh"><span class="mbd">${p?`<em class="bd ${p}">${p=='live'?'In corso':'Attesa risultati'}</em>`:''}</span>${sd?`<span class="mw">${fw(m.d)} · ${ft(m.d)}</span>`:''}</div>`:''}${tr(m.h,0)}${tr(m.a,1)}</div>`};
+const mrow=(m,hl=-1,sd=true)=>{const p=st(m),tr=(t,d)=>{const w=m.s&&m.s[d]>m.s[1-d];return `<div class="tr${w?' wn':''}" data-tm="${t}">${logo(t,26)}<span class="nm">${T[t]}</span>${m.p?`<span class="ps">${m.p.map(x=>`<i class="${x[d]>x[1-d]?'w':''}">${x[d]}</i>`).join('')}</span>`:''}<b class="tot">${m.s?m.s[d]:''}</b></div>`};return `<div class="mx ${m.h==hl||m.a==hl?'me':''}" data-m="${m.id}" role="button" tabindex="0">${(sd||p)?`<div class="mh"><span class="mbd">${p?`<em class="bd ${p}">${p=='live'?'In corso':'Risultato non caricato'}</em>`:''}</span>${sd?`<span class="mw">${fw(m.d)} · ${ft(m.d)}</span>`:''}</div>`:''}${tr(m.h,0)}${tr(m.a,1)}</div>`};
 const grp=(g,ms,hl,t)=>{const a=ms[0].d,b=ms[ms.length-1].d,one=ms.length==1,r=one?fw(a)+' · '+ft(a):fs(a)==fs(b)?fs(a):fs(a)+' – '+fs(b);return `<section class="card grp" data-g="${g}"><div class="gt"><b>${t||'Giornata '+g}</b><span>${r}</span></div>${ms.map(m=>mrow(m,hl,!one)).join('')}</section>`};
 const sod=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
 const relT=d=>{const ms=d-Date.now();if(ms<=0)return'';const dd=Math.round((sod(d)-sod(new Date()))/864e5);if(dd>=2)return 'Tra '+dd+' giorni';if(dd==1)return 'Domani';const m=Math.ceil(ms/6e4);return m>=60?'Tra '+Math.floor(m/60)+' h'+(m%60?' '+m%60+' min':''):m>1?'Tra '+m+' min':'Tra meno di 1 min'};
-const mstate=m=>{if(m.s)return'fin';const n=Date.now(),t=m.d.getTime();return n<t?'cd':n<t+108e5?'live':'wait'};
+const mstate=m=>{if(m.s)return'fin';const n=Date.now(),t=m.d.getTime();return n<t?'cd':n<t+216e5?'live':'wait'};
 const arch=m=>sod(new Date())>sod(m.d);// il giorno dopo la partita passa in "Ultimo risultato"
 const HM=()=>M.find(m=>mine(m)&&!arch(m)),LM=()=>[...M].reverse().find(m=>mine(m)&&arch(m));
 const PH=m=>PREV||mstate(m);
 const NXG=()=>{const n=HM();return n?n.g:0};
-const st=m=>{if(m.s)return'';const n=Date.now(),s=m.d.getTime();let p=n<s?'':n<s+108e5?'live':'wait';if(PREV&&PREV!='cd'&&m.g==NXG())p=PREV;return p};
+const st=m=>{if(m.s)return'';const n=Date.now(),s=m.d.getTime();let p=n<s?'':n<s+216e5?'live':'wait';if(PREV&&PREV!='cd'&&m.g==NXG())p=PREV;return p};
 // ---- Home: stessa struttura della schermata Home dell'app iOS ----
 const CHK='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg>',CRS='<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const homeHead=()=>`<div class="hm-h">${logo(0,48)}<div><b>Comunello Volley Rosà</b><span>Seconda divisione maschile · FIPAV Vicenza</span></div></div>`;
@@ -627,7 +627,7 @@ function homeCard(nx){const p=curPh=PH(nx),cd=p=='cd',r=nx.s||[0,0],gd=nx.d.toLo
 const ttl=p=='cd'?'Prossima partita':p=='live'?'In corso':p=='wait'?'Partita terminata':'Risultato finale';
 const ctr=p=='cd'?`<div class="cg-t">${ft(nx.d)}</div><div class="cg-d">${gd}</div><div class="cg-r" id="rel">${relT(nx.d)}</div>`
 :p=='live'?`<div class="cg-t dim">${ft(nx.d)}</div><div class="cg-r">Iniziata alle ${ft(nx.d)}</div>`
-:p=='wait'?`<div class="cg-w">In attesa</div><div class="cg-r">dei risultati</div>`
+:p=='wait'?`<div class="cg-w">Risultato</div><div class="cg-r">non ancora caricato</div>`
 :`<div class="cg-t"><i class="${r[0]>r[1]?'':'lo'}">${r[0]}</i> <i class="lo">–</i> <i class="${r[1]>r[0]?'':'lo'}">${r[1]}</i></div><div class="cg-r">${gd}</div>`;
 const sq=t=>`<div class="cg-s">${logo(t,56)}<span>${esc(T[t])}</span></div>`;
 return `<div class="cg" data-m="${nx.id}" role="button" tabindex="0" aria-label="Apri i dettagli della partita"><div class="cg-top"><b>${p=='live'?'<i class="cg-live"></i>':''}${ttl}</b><span>Giornata ${nx.g}</span></div><div class="cg-row">${sq(nx.h)}<div class="cg-c">${ctr}</div>${sq(nx.a)}</div></div>`}
@@ -644,7 +644,7 @@ let sig='';function tick(){const z=M.map(st).join('')+((HM()||{}).id||'');if(z!=
 setInterval(tick,1000);
 // ---- Calendario ----
 let CIO=null;
-function curG(){const n=Date.now(),m=M.find(x=>x.d.getTime()+108e5>n);return m?m.g:Math.max(...M.map(x=>x.g))}
+function curG(){const n=Date.now(),m=M.find(x=>x.d.getTime()+(x.s?108e5:216e5)>n);return m?m.g:Math.max(...M.map(x=>x.g))}
 function calScroll(){const gs=[...document.querySelectorAll('#v1 .grp')];if(!gs.length)return;const g=curG(),el=gs.find(e=>+e.dataset.g>=g)||gs[gs.length-1];if(el===gs[0]){scrollTo(0,0);return}const v=$('#v1');v.classList.add('nocv');const y=el.offsetTop-($('.hd').offsetHeight+42);scrollTo(0,Math.max(0,y));requestAnimationFrame(()=>v.classList.remove('nocv'))}
 let F='tutte';const FL={tutte:'Tutte',casa:'Casa',ospiti:'Ospiti',da:'Da giocare',fatte:'Giocate'};
 function cal(){const ok=m=>F=='tutte'||(mine(m)&&(F=='casa'?m.h==0:F=='ospiti'?m.a==0:F=='da'?!m.s:!!m.s));let h=`${calTiles()}<div class="csent"></div><div class="cbar" id="cbar"><div class="chips">${Object.keys(FL).map(k=>`<button class="${k==F?'on':''}" data-f="${k}">${FL[k]}</button>`).join('')}</div></div>`;
@@ -906,7 +906,7 @@ const fmRows=(t,m)=>{const f=M.filter(x=>x.s&&(x.h==t||x.a==t)&&x.d<m.d).sort((x
 const miniTbl=(h,a)=>{const R=table(),rows=[h,a].map(t=>[R.findIndex(r=>r.i==t),t]).sort((x,y)=>x[0]-y[0]);return `<div class="md-r h"><span></span><span></span><span>PG</span><span>PV</span><span>PP</span><span>Set</span><span>Pt</span></div>${rows.map(([k,t])=>{const r=R[k]||{};return `<div class="md-r" data-t="${t}"><span>${k+1}</span><span class="tq">${logo(t,24)}<span>${T[t]}</span></span><span>${r.g??'–'}</span><span>${r.v??'–'}</span><span>${r.p??'–'}</span><span>${r.sv??'–'}-${r.sp??'–'}</span><b>${r.pt??'–'}</b></div>`}).join('')}`};
 function mdHTML(m){const g=gym(m),h=m.h,a=m.a,sa=mstate(m),n=m.p?m.p.length:0,gap=Math.max(176,68+(n?8+22*n:0)+14);let mid;
 if(sa=='fin'){const[x,y]=m.s;mid=`<div class="md-res"><span class="${x>y?'w':'l'}">${x}</span><i>-</i><span class="${y>x?'w':'l'}">${y}</span></div><span class="md-lb">Terminata</span>`+(n?`<div class="md-sets">${m.p.map(([p,q])=>`<div class="md-set"><span class="${p>q?'w':''}">${p}</span><i>-</i><span class="${q>p?'w':''}">${q}</span></div>`).join('')}</div>`:'<span class="md-lb">Parziali non disponibili</span>')}
-else mid=`<b>${ft(m.d)}</b><span class="md-lb${sa=='live'?' live':''}">${sa=='cd'?fdays(m.d):sa=='live'?'In corso':'Partita terminata<br>In attesa dei risultati'}</span>`;
+else mid=`<b>${ft(m.d)}</b><span class="md-lb${sa=='live'?' live':''}">${sa=='cd'?fdays(m.d):sa=='live'?'In corso':'Partita terminata<br>Risultato non ancora caricato'}</span>`;
 const wx=!m.s&&m.d.getTime()+108e5>Date.now();
 return `<div class="md-bgw"><div class="md-bg"></div></div><div class="md-top"></div><div class="md-glow"></div><div class="md-bar"><button class="th" data-mdx aria-label="Chiudi"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>${navigator.share?'<button class="th" data-mds aria-label="Condividi"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>':'<span></span>'}</div>
 <div class="md-head"><div class="md-teams"><div class="md-team" data-t="${h}">${logo(h,56)}<div class="md-nm">${T[h]}</div></div><div class="md-mid">${mid}</div><div class="md-team" data-t="${a}">${logo(a,56)}<div class="md-nm">${T[a]}</div></div></div></div>
