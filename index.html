@@ -559,6 +559,54 @@ nav{background:var(--gl);-webkit-backdrop-filter:blur(24px) saturate(190%);backd
 .md-scroll{--e:calc(env(safe-area-inset-top,0px) + 54px + var(--hh)*(1 - var(--sp)*.6) - var(--sp)*50px);
  -webkit-mask-image:linear-gradient(180deg,transparent 0,transparent var(--e),#000 calc(var(--e) + 22px));
  mask-image:linear-gradient(180deg,transparent 0,transparent var(--e),#000 calc(var(--e) + 22px))}
+
+/* ===== v25: calendario del mese ===== */
+.mc{margin-top:16px;padding:14px 12px 12px}
+.mc-h{display:flex;align-items:center;justify-content:space-between;padding:0 6px 10px}
+.mc-h b{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.mc-h>span{display:flex;gap:8px}
+.mc-n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--sf2);color:var(--ink);touch-action:manipulation;transition:transform .15s var(--out),opacity .2s}
+.mc-n svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.mc-n:disabled{opacity:.28}.mc-n:active:not(:disabled){transform:scale(.9)}
+.mc-w,.mc-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center}
+.mc-w span{font-size:11px;font-weight:600;color:var(--mut);padding-bottom:4px}
+.mc-g{touch-action:pan-y}
+.mc-d{position:relative;height:42px;display:flex;align-items:center;justify-content:center;padding:0;font:inherit;color:var(--ink);background:none;-webkit-tap-highlight-color:transparent}
+.mc-d i{font-style:normal;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-variant-numeric:tabular-nums;transition:transform .15s var(--out)}
+.mc-d.td:not(.mt) i{background:var(--sf2);font-weight:700}
+.mc-d.mt{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.mc-d.mt:active i{transform:scale(.88)}
+.mc-d.h i{background:var(--acc);color:#111;font-weight:700}
+.mc-d.a i{box-shadow:inset 0 0 0 2px var(--acc);font-weight:700}
+.mc-d.td.mt i{outline:2px solid var(--ink);outline-offset:2px}
+.mc-d.w i{background:var(--ok);color:#fff;box-shadow:none}
+.mc-d.l i{background:var(--ko);color:#fff;box-shadow:none}
+.mc-d.live i{background:var(--acc);color:#111;box-shadow:none;animation:mcp 1.6s ease-out infinite}
+@keyframes mcp{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 70%,transparent)}100%{box-shadow:0 0 0 7px transparent}}
+.mc-d.sel i{outline:2px solid var(--ink);outline-offset:2px}
+.mc{position:relative}
+.mc-pop{position:absolute;left:10px;right:10px;z-index:6;background:var(--sf);border-radius:18px;padding:12px 12px 6px;box-shadow:0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.18);transform-origin:var(--ax) 0;animation:mcin .18s cubic-bezier(.23,1,.32,1)}
+@keyframes mcin{from{opacity:0;transform:scale(.96) translateY(-4px)}}
+.mc-ar{position:absolute;top:-7px;left:var(--ax);width:24px;height:8px;overflow:hidden}
+.mc-ar::before{content:"";position:absolute;left:5px;top:3px;width:14px;height:14px;background:var(--sf);transform:rotate(45deg);border-radius:3px;box-shadow:0 0 0 1px var(--line)}
+.mc-pr{display:flex;align-items:center;gap:12px}
+.mc-pr .logo{flex:none}
+.mc-pt{flex:1;min-width:0}
+.mc-pt small{display:block;font-size:12px;color:var(--mut)}
+.mc-pt b{display:block;font-size:16px;font-weight:650;line-height:1.2;overflow-wrap:anywhere}
+.mc-rs{flex:none;text-align:right}
+.mc-rs b{display:block;font-size:20px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1.1}
+.mc-rs small{display:block;font-size:12px;color:var(--mut)}
+.mc-rs.w b{color:var(--ok)}.mc-rs.l b{color:var(--ko)}.mc-rs.live b{font-size:15px}
+.mc-go{display:flex;align-items:center;justify-content:center;gap:2px;width:100%;height:40px;margin-top:8px;border-top:1px solid var(--line);font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:none;touch-action:manipulation}
+.mc-go svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.mc-l{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin-top:8px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--mut)}
+.mc-l span{display:inline-flex;align-items:center;gap:6px}
+.mc-l i{width:11px;height:11px;border-radius:50%;flex:none}
+.mc-l i.h{background:var(--acc)}.mc-l i.a{box-shadow:inset 0 0 0 2px var(--acc)}
+.mc-l i.w{background:var(--ok)}.mc-l i.l{background:var(--ko)}.mc-l i.live{background:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 35%,transparent)}
+@media (max-width:360px){.mc-l{display:grid;grid-template-columns:auto auto;justify-content:center;gap:6px 22px}}
+@media (prefers-reduced-motion:reduce){.mc-d.live i,.mc-pop{animation:none}.mc-d i,.mc-n{transition:none}}
 </style></head><body class="onhome">
 <main>
 <header class="hd"><button class="th" id="hbk" hidden aria-label="Indietro"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><span class="bt" id="bt"></span></header><div id="top0"></div><div class="lw" id="lw"><h1 class="lt" id="lt">Comunello Volley Rosà</h1></div>
@@ -611,12 +659,12 @@ const mrow=(m,hl=-1,sd=true)=>{const p=st(m),tr=(t,d)=>{const w=m.s&&m.s[d]>m.s[
 const grp=(g,ms,hl,t)=>{const a=ms[0].d,b=ms[ms.length-1].d,one=ms.length==1,r=one?fw(a)+' · '+ft(a):fs(a)==fs(b)?fs(a):fs(a)+' – '+fs(b);return `<section class="card grp" data-g="${g}"><div class="gt"><b>${t||'Giornata '+g}</b><span>${r}</span></div>${ms.map(m=>mrow(m,hl,!one)).join('')}</section>`};
 const sod=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
 const relT=d=>{const ms=d-Date.now();if(ms<=0)return'';const dd=Math.round((sod(d)-sod(new Date()))/864e5);if(dd>=2)return 'Tra '+dd+' giorni';if(dd==1)return 'Domani';const m=Math.ceil(ms/6e4);return m>=60?'Tra '+Math.floor(m/60)+' h'+(m%60?' '+m%60+' min':''):m>1?'Tra '+m+' min':'Tra meno di 1 min'};
-const mstate=m=>{if(m.s)return'fin';const n=Date.now(),t=m.d.getTime();return n<t?'cd':n<t+216e5?'live':'wait'};
+const mstate=m=>{if(m.s)return'fin';const n=Date.now(),t=m.d.getTime();return n<t?'cd':'live'};
 const arch=m=>sod(new Date())>sod(m.d);// il giorno dopo la partita passa in "Ultimo risultato"
 const HM=()=>M.find(m=>mine(m)&&!arch(m)),LM=()=>[...M].reverse().find(m=>mine(m)&&arch(m));
 const PH=m=>PREV||mstate(m);
 const NXG=()=>{const n=HM();return n?n.g:0};
-const st=m=>{if(m.s)return'';const n=Date.now(),s=m.d.getTime();let p=n<s?'':n<s+216e5?'live':'wait';if(PREV&&PREV!='cd'&&m.g==NXG())p=PREV;return p};
+const st=m=>{if(m.s)return'';const n=Date.now(),s=m.d.getTime();let p=n<s?'':'live';if(PREV&&PREV!='cd'&&m.g==NXG())p=PREV;return p};
 // ---- Home: stessa struttura della schermata Home dell'app iOS ----
 const CHK='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg>',CRS='<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
 const homeHead=()=>`<div class="hm-h">${logo(0,48)}<div><b>Comunello Volley Rosà</b><span>Seconda divisione maschile · FIPAV Vicenza</span></div></div>`;
@@ -644,12 +692,44 @@ let sig='';function tick(){const z=M.map(st).join('')+((HM()||{}).id||'');if(z!=
 setInterval(tick,1000);
 // ---- Calendario ----
 let CIO=null;
-function curG(){const n=Date.now(),m=M.find(x=>x.d.getTime()+(x.s?108e5:216e5)>n);return m?m.g:Math.max(...M.map(x=>x.g))}
+// ---- v25: calendario del mese con le partite del Rosà (casa = pieno, trasferta = anello) ----
+let MC=null;
+const MCN=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const CHV_L='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg>',CHV_R='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg>';
+const mk_=d=>d.getFullYear()*12+d.getMonth();
+function mcRange(){const ms=M.filter(mine);if(!ms.length)return null;const k=ms.map(m=>mk_(m.d));return[Math.min(...k),Math.max(...k)]}
+function monthCal(){const r=mcRange();if(!r)return'';if(MC==null){const n=HM()||LM();MC=n?mk_(n.d):mk_(new Date())}MC=Math.min(r[1],Math.max(r[0],MC));
+const y=Math.floor(MC/12),mo=MC%12,off=(new Date(y,mo,1).getDay()+6)%7,days=new Date(y,mo+1,0).getDate(),today=sod(new Date()),byDay={};
+M.filter(m=>mine(m)&&mk_(m.d)==MC).forEach(m=>{byDay[m.d.getDate()]=m});
+let c='';for(let i=0;i<off;i++)c+='<span class="mc-d"></span>';
+for(let d=1;d<=days;d++){const m=byDay[d],td=new Date(y,mo,d).getTime()==today;
+if(!m){c+=`<span class="mc-d${td?' td':''}"${td?' aria-current="date"':''}><i>${d}</i></span>`;continue}
+const home=m.h==0,opp=T[home?m.a:m.h],ph=mstate(m),sc=m.s?(home?m.s:[m.s[1],m.s[0]]):null,res=sc?(sc[0]>sc[1]?'w':'l'):ph=='live'?'live':'';
+const lbl=`${fw(m.d)}, ${home?'in casa':'in trasferta'} contro ${opp}, ${sc?(res=='w'?'vinta ':'persa ')+sc.join('-'):ph=='live'?'in corso':'ore '+ft(m.d)}`;
+c+=`<button class="mc-d mt ${home?'h':'a'}${res?' '+res:''}${td?' td':''}" data-mcm="${m.id}" aria-expanded="false" aria-label="${esc(lbl)}"><i>${d}</i></button>`}
+return `<section class="card mc" aria-label="Calendario partite del Rosà"><div class="mc-h"><b aria-live="polite">${MCN[mo]} ${y}</b><span><button class="mc-n" data-mc="-1" aria-label="Mese precedente"${MC<=r[0]?' disabled':''}>${CHV_L}</button><button class="mc-n" data-mc="1" aria-label="Mese successivo"${MC>=r[1]?' disabled':''}>${CHV_R}</button></span></div><div class="mc-w" aria-hidden="true">${['L','M','M','G','V','S','D'].map(x=>`<span>${x}</span>`).join('')}</div><div class="mc-g">${c}</div><div class="mc-l" aria-hidden="true"><span><i class="h"></i>In casa</span><span><i class="a"></i>In trasferta</span><span><i class="w"></i>Vinta</span><span><i class="l"></i>Persa</span><span><i class="live"></i>In corso</span></div></section>`}
+function mcGo(k){mcClose();const r=mcRange();if(!r)return;const n=Math.min(r[1],Math.max(r[0],MC+k));if(n==MC)return;MC=n;const o=$('#v1 .mc');if(!o)return;o.outerHTML=monthCal();mcBind()}
+function mcClose(){const p=$('#v1 .mc-pop');if(p)p.remove();document.querySelectorAll('#v1 .mc-d.sel').forEach(b=>{b.classList.remove('sel');b.setAttribute('aria-expanded','false')})}
+function mcPop(b){const was=b.classList.contains('sel');mcClose();if(was)return;const m=M.find(x=>x.id==b.dataset.mcm),o=$('#v1 .mc');if(!m||!o)return;
+const home=m.h==0,opp=home?m.a:m.h,ph=mstate(m),sc=m.s?(home?m.s:[m.s[1],m.s[0]]):null,w=sc&&sc[0]>sc[1];
+const right=sc?`<div class="mc-rs ${w?'w':'l'}"><b>${sc[0]}-${sc[1]}</b><small>${w?'Vinta':'Persa'}</small></div>`:ph=='live'?`<div class="mc-rs live"><b>In corso</b><small>attesa risultato</small></div>`:`<div class="mc-rs"><b>${ft(m.d)}</b><small>${relT(m.d)||''}</small></div>`;
+const p=document.createElement('div');p.className='mc-pop';p.setAttribute('role','dialog');p.setAttribute('aria-label','Partita del '+fw(m.d));
+p.innerHTML=`<span class="mc-ar"></span><div class="mc-pr">${logo(opp,40)}<div class="mc-pt"><small>${home?'In casa':'In trasferta'} · ${fw(m.d)}</small><b>${esc(T[opp])}</b></div>${right}</div><button class="mc-go" data-m="${m.id}">Dettagli partita<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></button>`;
+o.appendChild(p);b.classList.add('sel');b.setAttribute('aria-expanded','true');
+const ob=o.getBoundingClientRect(),bb=b.getBoundingClientRect(),y=bb.bottom-ob.top+4;p.style.top=y+'px';p.style.setProperty('--ax',(bb.left+bb.width/2-ob.left-12)+'px');
+const go=p.querySelector('.mc-go');go.addEventListener('click',()=>setTimeout(mcClose,300));go.focus({preventScroll:true});
+const pb=p.getBoundingClientRect();if(pb.bottom>innerHeight-96)scrollBy({top:pb.bottom-innerHeight+110,behavior:'smooth'})}
+document.addEventListener('click',e=>{if(!$('#v1 .mc-pop'))return;if(e.target.closest('.mc-pop')||e.target.closest('[data-mcm]'))return;mcClose()},true);
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&$('#v1 .mc-pop')){const b=$('#v1 .mc-d.sel');mcClose();if(b)b.focus()}});
+function mcBind(){const o=$('#v1 .mc');if(!o)return;o.querySelector('.mc-g').addEventListener('click',e=>{const b=e.target.closest('[data-mcm]');if(b)mcPop(b)});o.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{mcGo(+b.dataset.mc);const nb=$(`#v1 .mc [data-mc="${b.dataset.mc}"]`);if(nb&&!nb.disabled)nb.focus()});
+let x0=null,y0=0;const g=o.querySelector('.mc-g');g.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});g.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5)mcGo(dx<0?1:-1)},{passive:true})}
+
+function curG(){const n=Date.now(),m=M.find(x=>{const t=x.d.getTime();return t+108e5>n||(!x.s&&sod(x.d)>=sod(new Date(n)))});return m?m.g:Math.max(...M.map(x=>x.g))}
 function calScroll(){const gs=[...document.querySelectorAll('#v1 .grp')];if(!gs.length)return;const g=curG(),el=gs.find(e=>+e.dataset.g>=g)||gs[gs.length-1];if(el===gs[0]){scrollTo(0,0);return}const v=$('#v1');v.classList.add('nocv');const y=el.offsetTop-($('.hd').offsetHeight+42);scrollTo(0,Math.max(0,y));requestAnimationFrame(()=>v.classList.remove('nocv'))}
 let F='tutte';const FL={tutte:'Tutte',casa:'Casa',ospiti:'Ospiti',da:'Da giocare',fatte:'Giocate'};
-function cal(){const ok=m=>F=='tutte'||(mine(m)&&(F=='casa'?m.h==0:F=='ospiti'?m.a==0:F=='da'?!m.s:!!m.s));let h=`${calTiles()}<div class="csent"></div><div class="cbar" id="cbar"><div class="chips">${Object.keys(FL).map(k=>`<button class="${k==F?'on':''}" data-f="${k}">${FL[k]}</button>`).join('')}</div></div>`;
+function cal(){const ok=m=>F=='tutte'||(mine(m)&&(F=='casa'?m.h==0:F=='ospiti'?m.a==0:F=='da'?!m.s:!!m.s));let h=`${calTiles()}${monthCal()}<div class="csent"></div><div class="cbar" id="cbar"><div class="chips">${Object.keys(FL).map(k=>`<button class="${k==F?'on':''}" data-f="${k}">${FL[k]}</button>`).join('')}</div></div>`;
 for(let g=1;g<=Math.max(...M.map(m=>m.g));g++){const ms=M.filter(m=>m.g==g&&ok(m));if(!ms.length)continue;h+=grp(g,ms,0)}
-if(!h.includes('grp'))h+='<div class="empty">Nessuna partita con questo filtro</div>';$('#v1').innerHTML=h;if(CIO)CIO.disconnect();{const cs=$('#v1 .csent'),cb=$('#cbar');if(cs&&cb){CIO=new IntersectionObserver(([e])=>cb.classList.toggle('stuck',!e.isIntersecting&&e.boundingClientRect.top<0),{rootMargin:`-${$('.hd').offsetHeight}px 0px 0px 0px`});CIO.observe(cs)}}$('#v1').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{F=b.dataset.f;cal();requestAnimationFrame(calScroll)})}
+if(!h.includes('grp'))h+='<div class="empty">Nessuna partita con questo filtro</div>';$('#v1').innerHTML=h;if(CIO)CIO.disconnect();{const cs=$('#v1 .csent'),cb=$('#cbar');if(cs&&cb){CIO=new IntersectionObserver(([e])=>cb.classList.toggle('stuck',!e.isIntersecting&&e.boundingClientRect.top<0),{rootMargin:`-${$('.hd').offsetHeight}px 0px 0px 0px`});CIO.observe(cs)}}$('#v1').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{F=b.dataset.f;cal();requestAnimationFrame(calScroll)});mcBind()}
 // Esporta nel calendario: titolo "Casa" o "Ospiti - Avversaria", durata 3 ore, luogo = palestra
 const SH=$('#sh'),pad=n=>String(n).padStart(2,'0'),dt=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 const evT=m=>m.h==0?'Casa':'Ospiti - '+T[m.h],evL=m=>gym(m).n+', '+gym(m).a,nextMine=()=>M.filter(m=>mine(m)&&!m.s&&m.d>new Date()),end=m=>new Date(m.d.getTime()+108e5);
@@ -860,7 +940,7 @@ function posChartInit(){const e=document.getElementById('tmsc');if(e)e.scrollLef
 // ---- inizializzazione e navigazione ----
 let cur=0,back=0;const bs=[...document.querySelectorAll('#nav button')],show=i=>{document.querySelectorAll('.view').forEach((v,j)=>v.classList.toggle('on',i==j));const av=document.querySelectorAll('.view')[i];av.classList.remove('enter');void av.offsetWidth;av.classList.add('enter');setTimeout(()=>av.classList.remove('enter'),600);scrollTo({top:0});setTimeout(()=>document.querySelectorAll('.map').forEach(e=>{if(e._m){e._m.invalidateSize();e._fit&&e._fit()}}),80)};
 const TIT=['Comunello Volley Rosà','Calendario','Classifica','Palestre','','Squadra'];function setT(i){document.body.classList.remove('inteam');document.body.classList.toggle('onhome',i==0);$('#hbk').hidden=true;setLT(TIT[i])}
-let ni=0;function go(i,keep){setT(i);const fr=cur==4;cur=i;ni=Math.max(0,vb().findIndex(b=>BI[bs.indexOf(b)]==i));bs.forEach((x,j)=>x.classList.toggle('on',BI[j]==i));$('#nav').style.setProperty('--i',ni);show(i);if(i==5)sqEnter();if(i==1&&!keep)requestAnimationFrame(calScroll);if(fr){const v=document.querySelectorAll('.view')[i];v.classList.add('pop');setTimeout(()=>v.classList.remove('pop'),520)}navigator.vibrate&&navigator.vibrate(6)}
+let ni=0;function go(i,keep){setT(i);const fr=cur==4;cur=i;ni=Math.max(0,vb().findIndex(b=>BI[bs.indexOf(b)]==i));bs.forEach((x,j)=>x.classList.toggle('on',BI[j]==i));$('#nav').style.setProperty('--i',ni);show(i);if(i==5)sqEnter();if(i==1&&!keep){mcClose();scrollTo(0,0)}if(fr){const v=document.querySelectorAll('.view')[i];v.classList.add('pop');setTimeout(()=>v.classList.remove('pop'),520)}navigator.vibrate&&navigator.vibrate(6)}
 bs.forEach((b,i)=>b.onclick=()=>goUser(BI[i]));
 document.addEventListener('click',e=>{const inMd=e.target.closest('#md');if(e.target.closest('#hbk')){goBack();return}if(e.target.closest('[data-mdx]')){mdBack();return}if(e.target.closest('[data-mds]')){if(MDm)navigator.share({title:T[MDm.h]+' - '+T[MDm.a],text:fd(MDm.d)+' ore '+ft(MDm.d)+' · '+gym(MDm).n}).catch(()=>{});return}const mm=e.target.closest('[data-m]');if(mm){openMd(mm);return}const tg=e.target.closest('[data-tg]');if(tg){HX=!HX;const hh=tg.closest('.hero');hh.classList.toggle('open',HX);tg.setAttribute('aria-expanded',HX);return}if(e.target.closest('[data-cal]'))return openCal();if(e.target.closest('[data-ics]'))return ics();if(e.target.closest('[data-x]')||e.target.id=='sh'){SH.hidden=true;return}const t=e.target.closest('[data-t]');if(t){const i=+t.dataset.t;if(inMd){TS.push({k:'md',id:MDm.id,ms:[...MS],under:here()});closeMd(1)}else TS.push(here());team(i);return}const dd=e.target.closest('[data-d]');if(dd){DEMO=dd.dataset.d=='1';load(RAW);render();return}const p=e.target.closest('[data-p]');if(p){PREV=p.dataset.p||null;home();cal()}});
 document.addEventListener('scroll',e=>{const t=e.target;if(t.classList&&t.classList.contains('tbs'))t.toggleAttribute('data-end',t.scrollLeft+t.clientWidth>=t.scrollWidth-2)},true);
